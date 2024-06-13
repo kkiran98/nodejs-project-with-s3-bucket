@@ -14,14 +14,12 @@ Installation and Setup
 
     Clone the repository:
 
-    sh
-
 git clone <repository-url>
 cd <repository-directory>
 
 Install dependencies:
 
-sh
+
 
 npm install
 
@@ -40,13 +38,13 @@ AWS_BUCKET_NAME=<your-aws-s3-bucket-name>
 Set up Docker and Docker Compose:
 Ensure you have Docker installed, then run:
 
-sh
+
 
 docker-compose up -d
 
 Run the application:
 
-sh
+
 
     npm start
 
@@ -66,7 +64,7 @@ The docker-compose.yml file defines two services:
 
 Run the following command to build and start the containers:
 
-sh
+
 
 docker-compose up --build
 
@@ -128,7 +126,7 @@ Fetch User Data
 
     Use the "Fetch User Data" button on the /add-more page to retrieve and display all users' information
 
-License
 
-This project is licensed under the MIT License.
+
+
 
