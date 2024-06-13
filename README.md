@@ -14,8 +14,8 @@ Installation and Setup
 
     Clone the repository:
 
-git clone <repository-url>
-cd <repository-directory>
+$ git clone <repository-url>
+$ cd <repository-directory>
 
 Install dependencies:
 
@@ -30,9 +30,13 @@ env
 
 PORT=3000
 MONGO_URL=mongodb://mongodb:27017/signupDB
+
 AWS_REGION=<your-aws-region>
+
 AWS_ACCESS_KEY_ID=<your-aws-access-key-id>
+
 AWS_SECRET_ACCESS_KEY=<your-aws-secret-access-key>
+
 AWS_BUCKET_NAME=<your-aws-s3-bucket-name>
 
 Set up Docker and Docker Compose:
@@ -43,9 +47,6 @@ Ensure you have Docker installed, then run:
 docker-compose up -d
 
 Run the application:
-
-
-
     npm start
 
 The application should now be running on http://localhost:3000.
@@ -64,9 +65,7 @@ The docker-compose.yml file defines two services:
 
 Run the following command to build and start the containers:
 
-
-
-docker-compose up --build
+$ docker-compose up --build
 
 Application Structure
 
