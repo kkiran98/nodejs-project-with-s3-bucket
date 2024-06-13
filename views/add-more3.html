@@ -1,0 +1,110 @@
+DOCTYPE html>
+<html>
+<head>
+    <title>Add More</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Add More Information</h1>
+    <form action="/add-more" method="POST" enctype="multipart/form-data">
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br>
+        <label for="address">New Address:</label><br>
+        <input type="text" id="address" name="address" required><br>
+        <label for="phno">New Phone Number:</label><br>
+        <input type="text" id="phno" name="phno" required><br>
+        <label for="image">Additional Image:</label><br>
+        <input type="file" id="image" name="image" accept="image/*" required><br><br>
+        <input type="submit" value="Upload">
+    </form>
+
+    <h2>Fetch User Data</h2>
+    <button id="fetchButton">Fetch User Data</button>
+
+    <table id="userDataTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone number</th>
+                <th>Address</th>
+                <th>Profile Image</th>
+                <th>Additional Addresses</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- User data will be inserted here -->
+        </tbody>
+    </table>
+    <script>
+    document.getElementById('fetchButton').addEventListener('click', () => {
+        fetch('/fetch-user-data')
+            .then(response => response.json())
+            .then(data => {
+                let userDataHtml = '';
+                data.forEach(user => {
+                    let additionalAddressesHtml = '';
+                    user.additionalAddresses.forEach(addr => {
+                        additionalAddressesHtml += `<p>Address: ${addr.address}</p>
+                                                    <p>Phone: ${addr.phno}</p>
+                                                    <p><a href="${addr.imageUrl}" target="_blank">View Additional Image</a></p>
+                                                    <p><a href="${addr.smallImageUrl}" target="_blank">View Additional Small Image</a></p>`;
+                    });
+
+                    // Move values if the main fields are empty
+                    const phoneNumber = user.phno || (user.additionalAddresses[0] ? user.additionalAddresses[0].phno : '');
+                    const address = user.address || (user.additionalAddresses[0] ? user.additionalAddresses[0].address : '');
+                    const imageUrl = user.imageUrl || (user.additionalAddresses[0] ? user.additionalAddresses[0].imageUrl : '');
+                   
+
+                    userDataHtml += `<tr id="user-${user._id}">
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>${phoneNumber}</td>
+                        <td>${address}</td>
+                        <td><a href="${imageUrl}" target="_blank">View Profile Image</a></td>
+
+                        <td>${additionalAddressesHtml}</td>
+                        <td><button onclick="deleteUser('${user.email}', '${user._id}')">Delete</button></td>
+                    </tr>`;
+                });
+                document.querySelector('#userDataTable tbody').innerHTML = userDataHtml;
+            })
+            .catch(error => console.error('Error fetching user data:', error));
+    });
+
+    function deleteUser(email, userId) {
+        if (confirm("Are you sure you want to delete this user's address, phone number, and image?")) {
+            fetch(`/delete-user/${email}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById(`user-${userId}`).remove();
+                    } else {
+                        alert('Error deleting user: ' + data.message);
+                    }
+                })
+                .catch(error => console.error('Error deleting user:', error));
+        }
+    }
+</script>
+</body>
+</html>

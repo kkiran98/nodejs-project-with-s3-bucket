@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Data</title>
+    <style>
+        .container {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+        }
+        .left-column {
+            flex: 70%;
+            padding: 20px;
+        }
+        .right-column {
+            flex: 30%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-column">
+            <h1>User Data</h1>
+            <table id="userDataTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone Number</th>
+                        <th>Address</th>
+                        <th>Profile Image</th>
+                        <th>Additional Addresses</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- User data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+        <div class="right-column">
+            <button id="fetchButton">Fetch User Data</button>
+            <button id="addMoreButton">Add More Data</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('fetchButton').addEventListener('click', () => {
+            fetch('/user-data')
+                .then(response => response.json())
+                .then(data => {
+                    let userDataHtml = '';
+                    data.forEach(user => {
+                        let additionalAddressesHtml = '';
+                        user.additionalAddresses.forEach(addr => {
+                            additionalAddressesHtml += `<div>
+                                <p>Address: ${addr.address}</p>
+                                <img src="${addr.imageUrl}" alt="Additional Image" width="100">
+                            </div>`;
+                        });
+
+                        userDataHtml += `<tr id="user-${user._id}">
+                            <td>${user.name}</td>
+                            <td>${user.email}</td>
+                            <td>${user.phno}</td>
+                            <td>${user.address}</td>
+                            <td><img src="${user.imageUrl}" alt="Profile Image" width="100"></td>
+                            <td>${additionalAddressesHtml}</td>
+                            <td><button onclick="deleteUser('${user._id}', '${user.imageUrl}')">Delete</button></td>
+                        </tr>`;
+                    });
+                    document.querySelector('#userDataTable tbody').innerHTML = userDataHtml;
+                })
+                .catch(error => console.error('Error fetching user data:', error));
+        });
+
+        function deleteUser(userId, imageUrl) {
+            fetch(`/delete-user/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ imageUrl: imageUrl })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById(`user-${userId}`).remove();
+                    } else {
+                        alert('Error deleting user');
+                    }
+                })
+                .catch(error => console.error('Error deleting user:', error));
+        }
+
+        document.getElementById('addMoreButton').addEventListener('click', () => {
+            window.location.href = '/add-more';
+        });
+    </script>
+</body>
+</html>
+
