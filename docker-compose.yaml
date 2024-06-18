@@ -3,22 +3,35 @@ version: '3.3'
 services:
   app:
     build: .
+    image: yourdockerhubrepository:version
     ports:
       - "3000:3000"
     env_file:
       - .env
-    depends_on:
-      - mongodb
     environment:
-      - MONGO_URL=mongodb://mongodb:27017/signupDB
+      - MONGO_URL=add-your-mongodb-url-here
+    depends_on:
+      - mongo
+    networks:
+      - app-network
 
-  mongodb:
-    image: mongo:latest
+  mongo:
+    image: mongo:4.4 # Use a specific version for stability
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=username
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=yourmongodb
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    networks:
+      - app-network
 
 volumes:
   mongo-data:
+
+networks:
+  app-network:
 

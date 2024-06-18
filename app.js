@@ -23,18 +23,33 @@ const upload = multer({
     storage: multer.memoryStorage(),
 });
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+// Connect to MongoDB with retry logic
+const connectWithRetry = () => {
+    console.log('Attempting MongoDB connection...');
+    mongoose.connect(process.env.MONGO_URL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useCreateIndex: true,
+        connectTimeoutMS: 30000,
+        socketTimeoutMS: 45000
+    })
     .then(() => console.log('MongoDB connected'))
-    .catch(err => console.log('MongoDB connection error:', err));
+    .catch(err => {
+        console.log('MongoDB connection error:', err);
+        console.log('Retrying MongoDB connection in 5 seconds...');
+        setTimeout(connectWithRetry, 5000);
+    });
+};
+
+connectWithRetry();
 
 // Define a schema
 const userSchema = new mongoose.Schema({
-    name: String,
-    email: String,
-    phno: String,
-    password: String,
-    address: String,
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    phno: { type: String, required: true },
+    password: { type: String, required: true },
+    address: { type: String, required: true },
     imageUrl: String,
     smallImageUrl: String,
     additionalAddresses: [{
@@ -50,10 +65,12 @@ const User = mongoose.model('User', userSchema);
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json()); // Added to parse JSON bodies
 
 // Debugging middleware to log incoming requests
 app.use((req, res, next) => {
     console.log(`Incoming ${req.method} request to ${req.url}`);
+    console.log('Request body:', req.body); // Log request body
     next();
 });
 
@@ -69,36 +86,9 @@ app.get('/signup', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'signup.html'));
 });
 
-app.post('/signup', upload.single('image'), async (req, res) => {
+app.post('/signup', async (req, res) => {
     try {
-        if (!req.file) {
-            throw new Error('File is not uploaded');
-        }
-
-        const smallImageBuffer = await sharp(req.file.buffer)
-            .resize({ width: 50 })
-            .toBuffer();
-
-        const uploadOriginal = {
-            Bucket: process.env.AWS_BUCKET_NAME,
-            Key: Date.now().toString() + '-' + req.file.originalname,
-            Body: req.file.buffer,
-            ACL: 'public-read'
-        };
-
-        const uploadSmall = {
-            Bucket: process.env.AWS_BUCKET_NAME,
-            Key: Date.now().toString() + '-small-' + req.file.originalname,
-            Body: smallImageBuffer,
-            ACL: 'public-read'
-        };
-
-        const [dataOriginal, dataSmall] = await Promise.all([
-            s3.send(new PutObjectCommand(uploadOriginal)),
-            s3.send(new PutObjectCommand(uploadSmall))
-        ]);
-
-        const getUrl = (key) => `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+        console.log('Signup request body:', req.body); // Log the request body
 
         const newUser = new User({
             name: req.body.name,
@@ -106,13 +96,12 @@ app.post('/signup', upload.single('image'), async (req, res) => {
             phno: req.body.phno,
             password: req.body.password,
             address: req.body.address,
-            imageUrl: getUrl(uploadOriginal.Key),
-            smallImageUrl: getUrl(uploadSmall.Key),
         });
 
         await newUser.save();
         res.redirect('/login');
     } catch (err) {
+        console.error('Error during signup:', err);
         res.status(500).send(`Error during signup: ${err.message}`);
     }
 });
@@ -162,6 +151,10 @@ app.delete('/delete-user/:email', async (req, res) => {
             user.address = "";
             user.phno = "";
 
+            // Mark the fields as modified
+            user.markModified('address');
+            user.markModified('phno');
+
             if (user.imageUrl) {
                 const mainImageKey = user.imageUrl.split('/').pop();
                 await s3.send(new DeleteObjectCommand({
@@ -171,7 +164,8 @@ app.delete('/delete-user/:email', async (req, res) => {
                 user.imageUrl = "";
             }
 
-            await user.save();
+            // Save the user without validation
+            await user.save({ validateBeforeSave: false });
 
             res.json({ success: true });
         } else {
@@ -181,6 +175,7 @@ app.delete('/delete-user/:email', async (req, res) => {
         res.status(500).json({ success: false, message: `Error deleting user: ${err.message}` });
     }
 });
+
 
 app.get('/add-more', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'add-more.html'));
@@ -198,7 +193,7 @@ app.post('/add-more', upload.single('image'), async (req, res) => {
                 Bucket: process.env.AWS_BUCKET_NAME,
                 Key: Date.now().toString() + '-' + req.file.originalname,
                 Body: req.file.buffer,
-                ACL: 'public-read'
+                //ACL: 'public-read'
             };
 
             const [dataOriginal] = await Promise.all([
