@@ -91,8 +91,10 @@ Routes
 
    
     ```sh 
+    
     sudo apt update
     sudo apt upgrade -y
+    
     ```
     
     installation of Jenkins tool on ubuntu.
@@ -100,13 +102,16 @@ Routes
 
     
     ```sh
+    
     sudo apt install openjdk-11-jdk -y
+    
     ```
     
     Add Jenkins Repository:
 
     
     ```sh
+    
     sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
     https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
     echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" \
@@ -114,14 +119,17 @@ Routes
     /etc/apt/sources.list.d/jenkins.list > /dev/null
     sudo apt-get update
     sudo apt-get install jenkins -y
+    
     ```
     
     Start Jenkins:
 
     
     ```sh
+    
     sudo systemctl start jenkins
     sudo systemctl enable jenkins
+    
     ```
     
     
@@ -129,7 +137,9 @@ Routes
     Open a web browser and go to http://your_server_ip_or_domain:8080. You'll need to unlock Jenkins by entering the initial admin password, which can be found using:
     
     ```sh
+    
     sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+    
     ```
     
     go to manage jenkins add credentials with all required environment variables present in Jenkinsfile.
