@@ -9,7 +9,7 @@ services:
     env_file:
       - .env
     environment:
-      - MONGO_URL=add-your-mongodb-url-here
+      - MONGOD_URL=add-your-mongodb-url-here
     depends_on:
       - mongo
     networks:
