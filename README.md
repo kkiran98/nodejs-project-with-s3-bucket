@@ -14,7 +14,7 @@ Installation and Setup
 
     Clone the repository:
 
- ````markdown
+ `
 $ git clone <repository-url>
 
 Install dependencies:
