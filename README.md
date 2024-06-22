@@ -90,27 +90,27 @@ Routes
    for automation i am using Jenkins tool.
 
    
-    ```sh 
+```sh 
     
     sudo apt update
     sudo apt upgrade -y
     
-    ```
+```
     
     installation of Jenkins tool on ubuntu.
     install java7 before installing Jenkins. 
 
     
-    ```sh
+```sh
     
     sudo apt install openjdk-11-jdk -y
     
-    ```
+```
     
     Add Jenkins Repository:
 
     
-    ```sh
+```sh
     
     sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
     https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
@@ -120,27 +120,27 @@ Routes
     sudo apt-get update
     sudo apt-get install jenkins -y
     
-    ```
+```
     
     Start Jenkins:
 
     
-    ```sh
+```sh
     
     sudo systemctl start jenkins
     sudo systemctl enable jenkins
     
-    ```
+```
     
     
     Access Jenkins:
     Open a web browser and go to http://your_server_ip_or_domain:8080. You'll need to unlock Jenkins by entering the initial admin password, which can be found using:
     
-    ```sh
+```sh
     
     sudo cat /var/lib/jenkins/secrets/initialAdminPassword
     
-    ```
+```
     
     go to manage jenkins add credentials with all required environment variables present in Jenkinsfile.
     
