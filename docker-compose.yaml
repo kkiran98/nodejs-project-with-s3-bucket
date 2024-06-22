@@ -9,7 +9,7 @@ services:
     env_file:
       - .env
     environment:
-      - MONGODB_URL=add-your-mongodb-url-here
+      - MONGODB_URL=${MONGODB_URL}
     depends_on:
       - mongo
     networks:
@@ -19,9 +19,9 @@ services:
     image: mongo:4.4 # Use a specific version for stability
     restart: always
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=username
-      - MONGO_INITDB_ROOT_PASSWORD=password
-      - MONGO_INITDB_DATABASE=yourmongodb
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
     ports:
       - "27017:27017"
     volumes:
